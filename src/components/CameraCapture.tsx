@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback } from "react";
-import { Camera, Download, RotateCcw, Image } from "lucide-react";
+import { Camera, Download, RotateCcw, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import SpinViewer from "@/components/SpinViewer";
 
 interface CapturedPhoto {
   id: string;
@@ -18,6 +19,7 @@ const CameraCapture = () => {
   const [streaming, setStreaming] = useState(false);
   const [photos, setPhotos] = useState<CapturedPhoto[]>([]);
   const [currentAngle, setCurrentAngle] = useState(0);
+  const [showViewer, setShowViewer] = useState(false);
 
   const startCamera = useCallback(async () => {
     try {
@@ -65,6 +67,7 @@ const CameraCapture = () => {
   const reset = useCallback(() => {
     setPhotos([]);
     setCurrentAngle(0);
+    setShowViewer(false);
   }, []);
 
   return (
@@ -116,11 +119,21 @@ const CameraCapture = () => {
               <Button variant="outline" size="sm" onClick={reset} className="gap-1">
                 <RotateCcw className="w-4 h-4" /> Reset
               </Button>
-              <Button size="sm" onClick={downloadAll} className="gap-1">
-                <Download className="w-4 h-4" /> Download All
+              {photos.length >= 3 && (
+                <Button size="sm" onClick={() => setShowViewer(true)} className="gap-1">
+                  <Eye className="w-4 h-4" /> Preview 360°
+                </Button>
+              )}
+              <Button variant="outline" size="sm" onClick={downloadAll} className="gap-1">
+                <Download className="w-4 h-4" /> Download
               </Button>
             </div>
           </div>
+
+          {showViewer && (
+            <SpinViewer photos={photos} onClose={() => setShowViewer(false)} />
+          )}
+
           <div className="grid grid-cols-5 gap-2">
             {photos.map(photo => (
               <div key={photo.id} className="relative group rounded-lg overflow-hidden border border-border">
